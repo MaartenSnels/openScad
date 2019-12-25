@@ -3,11 +3,48 @@ kroonSteen = [5.8, 16.7, 7.7];
 schroef = [5.15, 1.3, 5.5];
 kroonSteenTussen = 2.4;
 
+dWire = 10;
 
-// kroonSteenBlok();
-// kroonSteenSchroeven();
-// kroonSteen();
-kroonStenen(3);
+
+
+////////////////////////////////////////////////////////
+///////////////// render drawing ///////////////////////
+////////////////////////////////////////////////////////
+
+//%kroonStenen(3);
+cableAngle(radius = dWire * 1, angle = 180, before = 50, after = 50);
+//cableMultiAngle();
+
+////////////////////////////////////////////////////////
+///////////////// prue display, do not print ///////////
+////////////////////////////////////////////////////////
+
+
+module cableMultiAngle(radius = 10, shape = [[90, 10, 10]]) {
+    for (s = shape) {
+        cableAngle(radius = radius, angle = s[0], before = s[1], after = s[2]);
+    }
+}
+
+module cableAngle(radius = 10, angle = 90, before = 10, after = 10) {
+    c = 10;
+    color("red")
+    rotate([0, 90, 0]) 
+        cylinder(d = dWire, h = before);
+    translate([before, radius, 0]) {
+     #color("yellow")
+       rotate([0, 0, -90])
+            rotate_extrude(angle = mod(angle), convexity = c)
+                translate([radius, 0])
+                    circle(d = dWire);
+    color("green")
+        rotate([0, 0, mod(angle)])
+    translate([0, -radius, 0]) 
+        rotate([0, 90, 0])
+            cylinder(d = dWire, h = after);
+    }
+    
+}
 
 module kroonStenen(aantal = 2) {
     t = kroonSteen.x + kroonSteenTussen;
@@ -50,3 +87,7 @@ module kroonSteenSchroeven() {
     }
 
 }
+
+function mod(angle) = angle < 0 ? mod(angle + 360) : angle;
+
+function nextCable(radius, startAngle = 0, startPos = [0, 0, 0], shape = [10, 90, 10]) = startPos + [0, 0, 0];
