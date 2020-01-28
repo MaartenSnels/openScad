@@ -1,0 +1,10 @@
+*.stl
+*.png
+*.jpg
+*_preview
+*.gcode
+*.zip
+*.skp
+*.html
+
+
