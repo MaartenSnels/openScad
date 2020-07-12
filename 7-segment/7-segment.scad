@@ -1,16 +1,19 @@
 $fn = 60;
 
-segment = [20, 55, 15];
+segment = [20, 55, 10];
 segmentCorner = 4;
 segmentMargin = 2.5;
 segmentBottom = .5;         // botom wall of segment, light must shine through
-segmentWall = 2;
+segmentWall = 1;
 segmentDrop = 7;
 
 boxCorner = 10;             // corner of box
 boxHeight = 25;             // height of the box
 boxBottom = 1;                // bottom wall of the box
 boxWall   = 2;
+
+ledDiameter = 5;
+ledsPerSegment = 2;
 
 ////////////////////////////////////////////////////////////////////////////////
 // CALCULATED VALUES
@@ -24,16 +27,10 @@ segmentConnect = segmentDrop + boxBottom;
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// TESTJES ////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
-color("black") huis();
-translate([0, 0, -segmentDrop])
-    color("white") cijfer();
-    
-
-
-//!segment(cube = segment, d = segmentMargin, connect = true, bottom = true);
-
-
+//for(i=[0:1])
+//    translate([box.x, 0, 0] * i)
+        display();
+//segment(connect = true);
 
 //////////// TODO //////////////
 // fullsegment en segment lijken nog niet op elkaar.
@@ -42,6 +39,41 @@ translate([0, 0, -segmentDrop])
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// MODULES ////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+module display() {
+    color("gray") huis();
+//    translate([0, 0, -segmentDrop + boxBottom + 1])
+        color("white") cijfer();
+}
+
+module dak(cube = segment) {
+    theCube = [segment.x, segment.y, segment.z / 2];
+    ledCube = [ledDiameter / 2, segment.y * 2, ledDiameter];
+    translate([0, 0, -segmentBottom]) {
+        difference() {
+            translate([0, 0, -theCube.z / 2 + segmentBottom])
+            fullSegment(cube = theCube, bottom=false);
+            for(i=[-0, 0]) {
+                rotate([0, 135 - i, 0])
+                    translate([0, -segment.y, 0] / 2)
+                        cube([segment.x, segment.y, segment.y]);
+            }
+//            translate([0, 0, -ledCube.z / 2])
+//                cube(ledCube, center = true);
+            leds();
+        }
+    }
+}
+
+module leds() {
+    x = (segment.y - ledDiameter) / (ledsPerSegment + 1);
+    for(i = [1 : ledsPerSegment])  
+    translate([0, (segment.y - ledDiameter) / 2 - i * x, 0]) {
+        cylinder (d = ledDiameter, h = segment.z * 2, center = true);
+        rotate([0, 180, 0])
+            cylinder (d1 = ledDiameter, d2 = ledDiameter + segment.z, h = segment.z, center = false);
+    }
+}
 
 
 module huis() {
@@ -83,7 +115,6 @@ module create7() {
     translate ([segment.y + d, segment.y + d      , 0]  ) rotate([0, 0, 180]) children();
     translate ([0            , segment.y + d      , 0]  ) rotate([0, 0,   0]) children();
     translate ([segment.y + d, segment.y + d      , 0]/2) rotate([0, 0, 270]) children();
-    translate ([segment.y + d, segment.y + d      , 0]/2) rotate([0, 0,  90]) children();
     translate ([segment.y + d, -segment.y - d     , 0]/2) rotate([0, 0,  90]) children();
     translate ([segment.y + d, (segment.y + d) * 3, 0]/2) rotate([0, 0, 270]) children();
 }
@@ -96,9 +127,10 @@ module segment(cube = segment, d = 0, connect = false, bottom = true) {
         translate([0, 0, m / 2])
             cube([m, m, m], center = true);
     }
+    dak(cube = segment);
 }
 
-module fullSegment(cube = [10, 30, 10], flat = false, connect = false, bottom = true) {
+module fullSegment(cube = segment, flat = false, connect = false, bottom = true) {
     x = cube.x / cos(45) / 2;
     trans = [0, cube.y - sqrt(2) * x, 0] / 2;
     theCube = [x, x, cube.z];

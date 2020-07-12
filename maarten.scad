@@ -13,7 +13,7 @@
 //}
 
 size = [100, 200, 300];
-tubedCube(size = size);
+roundedCube(size = size);
 translate([0, size.y * 1.1, 0]) fullRoundedCube(size);
 
 /**
@@ -125,11 +125,11 @@ module roundedCube(size = []        // size of the box
 
 module tube(radius = 10, h = 200, fn = 60) {
     up(radius) {
-        sphere(r = radius, fn = 60);
+        sphere(r = radius, $fn = 60);
         cylinder(r = radius, h = h - radius * 2, $fn = fn);
     }
     up(h - radius)
-        sphere(r = radius, fn = 60);
+        sphere(r = radius, $fn = 60);
 }
 
 
@@ -137,19 +137,19 @@ module tube(radius = 10, h = 200, fn = 60) {
 module halfTubeCube(size = [100, 200, 300], fn = 60, radius = 10) {
     // x-as
     rt(t=[0, radius, radius], r=[0, 90, 0])
-        tube(h=size.x, radius = radius, fn = fn);
+        tube(h=size.x, radius = radius, $fn = fn);
     rt(t=[0, size.y - radius, radius], r=[0, 90, 0])
-        tube(h=size.x, radius = radius, fn = fn);
+        tube(h=size.x, radius = radius, $fn = fn);
     // y-as
     rt(t=[radius, 0, radius], r=[-90, 0, 0])
-        tube(h=size.y, radius = radius, fn = fn);
+        tube(h=size.y, radius = radius, $fn = fn);
     rt(t=[radius, 0, size.z - radius], r=[-90, 0, 0])
-        tube(h=size.y, radius = radius, fn = fn);
+        tube(h=size.y, radius = radius, $fn = fn);
     //z-as
     rt(t=[radius, radius, 0], r=[0, 0, 0])
-        tube(h=size.z, radius = radius, fn = fn);
+        tube(h=size.z, radius = radius, $fn = fn);
     rt(t=[radius, size.y - radius, 0], r=[0, 0, 0])
-        tube(h=size.z, radius = radius, fn = fn);
+        tube(h=size.z, radius = radius, $fn = fn);
 }
 
 module fullTubeCube(size = [100, 200, 300], fn = 60, radius = 10) {
@@ -157,19 +157,22 @@ module fullTubeCube(size = [100, 200, 300], fn = 60, radius = 10) {
     translate(size)
         rotate([0, 0, 180]) 
             mirror([0, 0, -1])
-                halfTubeCube(size = size, fn = fn, radius = radius);
+                halfTubeCube(size = size, $fn = fn, radius = radius);
 }
 
 module tubedCube(size = [100, 200, 300], fn = 60, radius = 10) {
-    fullTubeCube(size = size, fn = fn, radius = radius);
+    fullTubeCube(size = size, $fn = fn, radius = radius);
     translate([1, 1, 1] * radius) cube(size - [1, 1, 1] * radius * 2);
 }
 
-module fullRoundedCube(size = [100, 200, 300], fn = 60, radius = 10) {
-    fullTubeCube(size = size, fn = fn, radius = radius);
-    translate([1, 1, 0] * radius) cube(size - [1, 1, 0] * radius * 2);
-    translate([1, 0, 1] * radius) cube(size - [1, 0, 1] * radius * 2);
-    translate([0, 1, 1] * radius) cube(size - [0, 1, 1] * radius * 2);
+module fullRoundedCube(size = [100, 200, 300], fn = 60, radius = 10, center = false) {
+    
+    translate(center ? size * -0.5 : [0, 0, 0]) {
+        fullTubeCube(size = size, fn = fn, radius = radius);
+        translate([1, 1, 0] * radius) cube(size - [1, 1, 0] * radius * 2);
+        translate([1, 0, 1] * radius) cube(size - [1, 0, 1] * radius * 2);
+        translate([0, 1, 1] * radius) cube(size - [0, 1, 1] * radius * 2);
+    }
 }
 
 
@@ -238,6 +241,8 @@ module screwHole( dScrew = 4     // diameeter of screw hole
     }
 }
 
-module led(){
-    
+
+module tubularRing(dTube = 10, dRing = 100, fn = 60, angle = 360){
+   rotate_extrude(angle=angle, convexity=10, $fn = fn)
+       translate([dRing - dTube, 0] / 2) circle(d = dTube);
 }

@@ -1,4 +1,5 @@
 *.stl
+*.obj
 *.png
 *.jpg
 *_preview
